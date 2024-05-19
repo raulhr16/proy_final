@@ -1,0 +1,47 @@
+<!-- detalles_circuito.html -->
+
+{% extends "principal.html" %}
+{% block title %}Detalles del Circuito{% endblock %}
+{% block titulo %}Detalles del Circuito{% endblock %}
+{% block contenido %}
+
+<h2>Detalles del Circuito</h2>
+<p><strong>Nombre del GP:</strong> {{ circuito.meeting_name }}</p>
+<p><strong>Nombre Oficial:</strong> {{ circuito.meeting_official_name }}</p>
+<p><strong>Ubicación:</strong> {{ circuito.location }}</p>
+<p><strong>País:</strong> {{ circuito.country_name }}</p>
+<p><strong>Fecha de inicio:</strong> {{ circuito.date_start }}</p>
+
+<h2>Información Meteorológica</h2>
+{% if weather_data %}
+    <table>
+        <thead>
+            <tr>
+                <th>Fecha y Hora</th>
+                <th>Sensación Térmica</th>
+                <th>Temperatura</th>
+                <th>Nubes</th>
+                <th>Presión</th>
+                <th>Precipitaciones</th>
+                <th>Velocidad del Viento</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for hora in weather_data %}
+                <tr>
+                    <td>{{ hora.timestamp_local }}</td>
+                    <td>{{ hora.app_temp }}</td>
+                    <td>{{ hora.temp }}</td>
+                    <td>{{ hora.clouds }}</td>
+                    <td>{{ hora.pres }}</td>
+                    <td>{{ hora.precip }}</td>
+                    <td>{{ hora.wind_spd }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p>No hay información meteorológica disponible.</p>
+{% endif %}
+
+{% endblock %}

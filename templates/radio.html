@@ -1,0 +1,67 @@
+<!-- radio.html -->
+
+{% extends "principal.html" %}
+{% block title %}Radio Control{% endblock %}
+{% block titulo %}Radio Control{% endblock %}
+{% block imagen %}src="/static/images/radio.jpg"{%endblock%}
+{% block contenido %}
+
+<h2>Buscar Información del Piloto</h2>
+<form method="get" action="/radio">
+    <label for="driver_number">Número del Piloto (1-99):</label>
+    <input type="text" id="driver_number" name="driver_number" required>
+    <button type="submit">Buscar</button>
+</form>
+
+{% if error %}
+    <p style="color:red;">{{ error }}</p>
+{% endif %}
+
+{% if race_control_data %}
+    <h2>Información de Control de Carrera para el Piloto {{ driver_number }}</h2>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Fecha</th>
+                <th>Evento</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for control in race_control_data %}
+                <tr>
+                    <td>{{ control.date }}</td>
+                    <td>{{ control.message }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% if team_radio_data %}
+        <h2>Grabaciones de Radio del Equipo</h2>
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Grabación</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for radio in team_radio_data %}
+                    <tr>
+                        <td>{{ radio.date }}</td>
+                        <td>
+                            <audio controls>
+                                <source src="{{ radio.recording_url }}" type="audio/mpeg">
+                                Tu navegador no soporta la reproducción de audio.
+                            </audio>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No hay grabaciones de radio disponibles para este piloto.</p>
+    {% endif %}
+{% endif %}
+
+{% endblock %}
