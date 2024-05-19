@@ -1,0 +1,39 @@
+<!-- circuitos.html -->
+
+{% extends "principal.html" %}
+{% block title %}F1 MANIA{% endblock %}
+{% block titulo %}Circuitos{% endblock %}
+{% block imagen %}src="/static/images/pic11.jpg"{% endblock %}
+{% block contenido %}
+{% if selected_circuito %}
+    <h2>Detalles del Circuito</h2>
+    <ul>
+        <li>
+            {{ selected_circuito.meeting_official_name }}
+            <!-- Aquí puedes mostrar otros detalles del circuito si es necesario -->
+        </li>
+    </ul>
+{% else %}
+    <h2>Buscar Circuitos</h2>
+    <form action="/circuitos" method="GET">
+        <label for="circuito">Selecciona un circuito:</label>
+        <select id="circuito" name="circuito">
+            <option value="">Todos</option>
+            {% for meeting in meetings %}
+                <option value="{{ meeting.meeting_name }}">{{ meeting.meeting_name }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit">Buscar</button>
+    </form>
+
+    <h2>Lista de Circuitos</h2>
+    <ul>
+        {% for meeting in meetings %}
+            <li>
+                {{ meeting.meeting_name }}
+                <a href="/circuitos?circuito={{ meeting.meeting_name }}">Detalles</a>
+            </li>
+        {% endfor %}
+    </ul>
+{% endif %}
+{% endblock %}

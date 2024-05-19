@@ -1,7 +1,7 @@
 # app.py
 
 from flask import Flask, render_template, request, redirect, url_for
-import json
+import requests
 
 app = Flask(__name__)
 
@@ -9,59 +9,60 @@ app = Flask(__name__)
 def inicio():
     return render_template("inicio.html")
 
-@app.route('/buscador', methods=['GET', 'POST'])
-def buscador():
-    ruta_archivo = 'static/js/nba.json'
-    with open(ruta_archivo, 'r') as archivo:
-        datos_json = json.load(archivo)
+@app.route('/pilotos')
+def pilotos():
+    api_url = "https://api.openf1.org/v1/drivers?session_key=9510"
+    response = requests.get(api_url)
+    if response.status_code == 200:
+        drivers = response.json()
+    else:
+        drivers = []
+    return render_template("pilotos.html", drivers=drivers)
 
-    jugadores = datos_json.get("players", [])
-    
-    # Obtener posiciones únicas de los jugadores
-    posiciones = set(jugador.get('pos') for jugador in jugadores)
 
-    if request.method == 'POST':
-        nombre_jugador = request.form['nombre']
-        posicion = request.form['posicion']
+# app.py
 
-        if not nombre_jugador and not posicion:  # Si no se introduce nada en ninguno de los dos buscadores
-            resultados = jugadores
-        else:
-            resultados = []
-            for jugador in jugadores:
-                nombre_coincide = 'name' in jugador and jugador['name'].lower().startswith(nombre_jugador.lower())
-                posicion_coincide = jugador.get('pos') == posicion
-                if nombre_coincide and posicion_coincide:
-                    resultados.append(jugador)
-            if not resultados:  # Si no se encuentran resultados
-                if nombre_jugador and not posicion:
-                    return render_template('buscador.html', posiciones=posiciones, resultados=[], error="Por favor, selecciona una posición válida.")
-                else:
-                    return render_template('buscador.html', posiciones=posiciones, resultados=[], error="No se encontraron jugadores con esa combinación de nombre y posición.")
-        return render_template('buscador.html', posiciones=posiciones, resultados=resultados)
-    
-    # Si la solicitud es GET o si no se ha enviado ningún formulario, simplemente mostrar el formulario de búsqueda
-    return render_template('buscador.html', posiciones=posiciones)
+@app.route('/circuitos', methods=['GET'])
+def circuitos():
+    meetings = []
 
-@app.route('/jugador/<nombre>')
-def jugador(nombre):
-    ruta_archivo = 'static/js/nba.json'
-    try:
-        with open(ruta_archivo, 'r') as archivo:
-            datos_json = json.load(archivo)
-    except FileNotFoundError:
-        # Si el archivo no se encuentra, abortar con un error 404
-        abort(404)
+    circuito = request.args.get('circuito')
+    selected_circuito = None
 
-    jugadores = datos_json.get("players", [])
-    
-    for jugador in jugadores:
-        if jugador.get('name') == nombre:
-            return render_template('jugador.html', jugador=jugador)
-    
-    # Si el jugador no se encuentra, mostrar mensaje de error y enlace para volver al inicio
-    mensaje_error = f"El jugador '{nombre}' no ha sido encontrado. <a href='/'>Volver al inicio</a>"
-    return mensaje_error, 404
+    if circuito:
+        # Si se envió el formulario de búsqueda
+        api_url = f"https://api.openf1.org/v1/meetings?year=2023&meeting_name={circuito}"
+        response = requests.get(api_url)
+        if response.status_code == 200:
+            selected_circuito = response.json()
+    else:
+        # Si no se envió el formulario de búsqueda, obtener la lista de todos los circuitos
+        api_url = "https://api.openf1.org/v1/meetings?year=2023"
+        response = requests.get(api_url)
+        if response.status_code == 200:
+            meetings = response.json()
+
+    return render_template("circuitos.html", meetings=meetings, selected_circuito=selected_circuito)
+
+
+
+@app.route('/detalles_circuito/<meeting_key>')
+def detalles_circuito(meeting_key):
+    api_url = f"https://api.openf1.org/v1/meetings?year=2023&meeting_key={meeting_key}"
+    response = requests.get(api_url)
+    if response.status_code == 200:
+        circuito_info = response.json()
+        return render_template("detalles.html", circuito=circuito_info)
+    else:
+        return "Error al obtener detalles del circuito"
+
+@app.route('/radio')
+def radio():
+    return render_template("radio_control.html")
+
+@app.route('/tiempo')
+def tiempo():
+    return render_template("tiempo.html")
 
 if __name__ == "__main__":
     app.run("0.0.0.0", 5000, debug=True)

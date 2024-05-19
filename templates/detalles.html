@@ -1,0 +1,19 @@
+<!-- detalles.html -->
+{% extends "principal.html" %}
+{% block tittle %}F1 MANIA - Detalles del Circuito{% endblock %}
+{% block titulo %}Detalles del Circuito{% endblock %}
+{% block imagen %}src="/static/images/pic12.jpg"{% endblock %}
+{% block contenido %}
+{% if circuito %}
+    <h2>{{ circuito.meeting_official_name }}</h2>
+    <p><strong>País:</strong> {{ circuito.country }}</p>
+    <p><strong>Ciudad:</strong> {{ circuito.city }}</p>
+    <p><strong>Longitud:</strong> {{ circuito.track_length }}</p>
+    <p><strong>Vueltas:</strong> {{ circuito.laps }}</p>
+    <p><strong>Fecha:</strong> {{ circuito.date }}</p>
+    <p><strong>Hora:</strong> {{ circuito.time }}</p>
+    <!-- Agrega más detalles según la estructura de tu objeto circuito -->
+{% else %}
+    <p>No se encontró información del circuito.</p>
+{% endif %}
+{% endblock %}

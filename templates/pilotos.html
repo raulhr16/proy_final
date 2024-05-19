@@ -1,0 +1,28 @@
+{% extends "principal.html" %}
+{% block tittle %}F1 MANIA{%endblock%}
+{% block titulo %}Pilotos{%endblock%}
+{% block imagen %}src="/static/images/pilotos.jpg"{%endblock%}
+{% block contenido %}
+<ul class="pilotos-list">
+    {% for driver in drivers %}
+    <li class="piloto-item">
+        <img src="{{ driver.headshot_url }}" alt="{{ driver.full_name }}" width="100">
+        <div class="piloto-info">
+            <h3>{{ driver.full_name }}</h3>
+            <table class="piloto-details">
+                <tbody>
+                    <tr>
+                        <td><strong>Número piloto:</strong></td>
+                        <td>{{ driver.driver_number }}</td>
+                        <td><strong>Equipo:</strong></td>
+                        <td>{{ driver.team_name }}</td>
+                        <td><strong>Nacionalidad:</strong></td>
+                        <td>{{ driver.country_code }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </li>
+    {% endfor %}
+</ul>
+{% endblock %}
