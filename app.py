@@ -33,7 +33,9 @@ def circuitos():
 
     if circuito is not None:  # Se ha enviado el formulario
         if circuito:  # Si se seleccionó un circuito específico
-            meetings = [meeting for meeting in granp if meeting['meeting_name'] == circuito]
+            for meeting in granp:
+                if meeting['meeting_name'] == circuito:
+                    meetings.append(meeting)
         else:  # Si no se seleccionó ningún circuito
             meetings = granp
 
@@ -46,7 +48,7 @@ def detalles_circuito(circuit_key):
     if response.status_code == 200:
         circuitos = response.json()
         if not circuitos:
-            return render_template("error.html", mensaje="El circuito no existe o no se encontró.")
+            return render_template("error.html")
         
         circuito = circuitos[0]  # Suponiendo que la API devuelve una lista de un ítem
 
@@ -68,7 +70,7 @@ def detalles_circuito(circuit_key):
 
         return render_template("detalles_circuito.html", circuito=circuito, weather_data=weather_data)
     else:
-        return render_template("error.html", mensaje="Error al obtener detalles del circuito.")
+        return render_template("error.html")
 
 @app.route('/radio', methods=['GET'])
 def radio():
@@ -86,16 +88,15 @@ def radio():
             response = requests.get(api_url)
             if response.status_code == 200:
                 race_control_data = response.json()
-                
                 if not race_control_data:
                     error = "No hay información disponible para el número de piloto proporcionado."
                 else:
                     for data in race_control_data:
                         session_key = data['session_key']
                         api_url_team_radio = f"https://api.openf1.org/v1/team_radio?session_key={session_key}&driver_number={driver_number}"
-                        response_team_radio = requests.get(api_url_team_radio)
-                        if response_team_radio.status_code == 200:
-                            team_radio_data.extend(response_team_radio.json())
+                        respuesta_radio = requests.get(api_url_team_radio)
+                        if respuesta_radio.status_code == 200:
+                            team_radio_data.extend(respuesta_radio.json())
                         else:
                             team_radio_data = []
             else:
@@ -103,11 +104,39 @@ def radio():
     
     return render_template("radio.html", race_control_data=race_control_data, team_radio_data=team_radio_data, error=error, driver_number=driver_number)
 
-
-
-@app.route('/tiempo')
+@app.route('/tiempo', methods=['GET'])
 def tiempo():
-    return render_template("tiempo.html")
+    error = None
+    weather_data = None
+    ciudad = request.args.get('ciudad')
+    fecha_inicio = request.args.get('fecha_inicio')
+    fecha_fin = request.args.get('fecha_fin')
+
+    # Solo procesar la solicitud si encuentra todos los parámetros
+    if ciudad and fecha_inicio and fecha_fin:
+        try:
+            formato_fecha = "%Y-%m-%d"
+            inicio = datetime.strptime(fecha_inicio, formato_fecha)
+            final = datetime.strptime(fecha_fin, formato_fecha)
+            inicio_str = inicio.strftime("%Y-%m-%d:%H")
+            final_str = final.strftime("%Y-%m-%d:%H")
+            clave_api = os.environ.get('clave_tiempo_api')
+            api_url = f"https://api.weatherbit.io/v2.0/history/hourly?city={ciudad}&start_date={inicio_str}&end_date={final_str}&tz=local&key={clave_api}"
+            response = requests.get(api_url)
+            
+            if response.status_code == 200:
+                datos = response.json()
+                weather_data = datos.get('data', [])
+                
+                if not weather_data:
+                    error = "No hay información disponible para la ciudad y fechas proporcionadas."
+            else:
+                error = "Error al obtener datos de la API. Verifica la ciudad y las fechas."
+        except Exception as fallo:
+            error = f"Error en la solicitud: {str(fallo)}"
+    
+    return render_template("tiempo.html", error=error, weather_data=weather_data, ciudad=ciudad, fecha_inicio=fecha_inicio, fecha_fin=fecha_fin)
+
 
 if __name__ == "__main__":
     app.run("0.0.0.0", 5000, debug=True)

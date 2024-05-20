@@ -9,7 +9,7 @@
 <h2>Buscar Información del Piloto</h2>
 <form method="get" action="/radio">
     <label for="driver_number">Número del Piloto (1-99):</label>
-    <input type="text" id="driver_number" name="driver_number" required>
+    <input type="text" id="driver_number" name="driver_number" value="{{ driver_number or '' }}" required>
     <button type="submit">Buscar</button>
 </form>
 

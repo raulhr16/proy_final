@@ -1,5 +1,55 @@
+<!-- templates/tiempo.html -->
+
 {% extends "principal.html" %}
-{% block tittle %}F1 MANIA{%endblock%}
-{% block titulo %}LOCURA{%endblock%}
-{% block imagen %}src="/static/images/pic11.jpg"{%endblock%}
-{% block contenido %}Hola guapos{%endblock%}
+{% block title %}Clima{% endblock %}
+{% block titulo %}Información del Clima{% endblock %}
+{% block imagen %}src="/static/images/clima.jpg"{%endblock%}
+{% block contenido %}
+
+<h2>Buscar Información del Clima</h2>
+<form method="get" action="/tiempo">
+    <label for="ciudad">Ciudad:</label>
+    <input type="text" id="ciudad" name="ciudad" value="{{ ciudad or '' }}" required>
+    <br>
+    <label for="fecha_inicio">Fecha de Inicio (YYYY-MM-DD):</label>
+    <input type="date" id="fecha_inicio" name="fecha_inicio" value="{{ fecha_inicio or '' }}" required>
+    <br>
+    <label for="fecha_fin">Fecha Final (YYYY-MM-DD):</label>
+    <input type="date" id="fecha_fin" name="fecha_fin" value="{{ fecha_fin or '' }}" required>
+    <br>
+    <button type="submit">Buscar</button>
+</form>
+
+{% if error %}
+    <p style="color:red;">{{ error }}</p>
+{% endif %}
+
+{% if weather_data %}
+    <h2>Información del Clima para {{ ciudad }} del {{ fecha_inicio }} al {{ fecha_fin }}</h2>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Fecha y Hora</th>
+                <th>Temperatura</th>
+                <th>Humedad</th>
+                <th>Precipitación</th>
+                <th>Viento</th>
+                <th>Presión</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for data in weather_data %}
+                <tr>
+                    <td>{{ data.datetime }}</td>
+                    <td>{{ data.temp }} °C</td>
+                    <td>{{ data.rh }} %</td>
+                    <td>{{ data.precip }} mm</td>
+                    <td>{{ data.wind_spd }} m/s</td>
+                    <td>{{ data.pres }} hPa</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endif %}
+
+{% endblock %}
