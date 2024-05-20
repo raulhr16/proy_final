@@ -112,7 +112,7 @@ def tiempo():
     fecha_inicio = request.args.get('fecha_inicio')
     fecha_fin = request.args.get('fecha_fin')
 
-    # Solo procesar la solicitud si encuentra todos los parámetros
+    # Solo procesa la solicitud si encuentra todos los parámetros
     if ciudad and fecha_inicio and fecha_fin:
         try:
             formato_fecha = "%Y-%m-%d"
