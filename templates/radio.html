@@ -8,8 +8,8 @@
 
 <h2>Buscar Información del Piloto</h2>
 <form method="get" action="/radio">
-    <label for="driver_number">Número del Piloto (1-99):</label>
-    <input type="text" id="driver_number" name="driver_number" value="{{ driver_number or '' }}" required>
+    <label for="driver_name">Nombre del Piloto:</label>
+    <input type="text" id="driver_name" name="driver_name" value="{{ driver_name or '' }}" required>
     <button type="submit">Buscar</button>
 </form>
 
@@ -17,8 +17,8 @@
     <p style="color:#95ffd9;">{{ error }}</p>
 {% endif %}
 
-{% if race_control_data %}
-    <h2>Información de Control de Carrera para el Piloto {{ driver_number }}</h2>
+{% if race_control_datos %}
+    <h2>Información de Control de Carrera para el Piloto {{ driver_name }}</h2>
     <table border="1">
         <thead>
             <tr>
@@ -27,7 +27,7 @@
             </tr>
         </thead>
         <tbody>
-            {% for control in race_control_data %}
+            {% for control in race_control_datos %}
                 <tr>
                     <td>{{ control.date }}</td>
                     <td>{{ control.message }}</td>

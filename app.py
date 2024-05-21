@@ -75,34 +75,50 @@ def detalles_circuito(circuit_key):
 @app.route('/radio', methods=['GET'])
 def radio():
     error = None
-    race_control_data = None
+    race_control_datos = None
     team_radio_data = []
     
-    driver_number = request.args.get('driver_number')
+    driver_name = request.args.get('driver_name')
     
-    if driver_number is not None:
-        if not driver_number.isdigit() or int(driver_number) < 1 or int(driver_number) > 99:
-            error = "Por favor, introduce un número del 1 al 99."
-        else:
-            api_url = f"https://api.openf1.org/v1/race_control?driver_number={driver_number}"
-            response = requests.get(api_url)
-            if response.status_code == 200:
-                race_control_data = response.json()
-                if not race_control_data:
-                    error = "No hay información disponible para el número de piloto proporcionado."
+    if driver_name:
+        api_url_drivers = "https://api.openf1.org/v1/drivers?session_key=9510"
+        respuesta = requests.get(api_url_drivers)
+        
+        if respuesta.status_code == 200:
+            drivers = respuesta.json()
+            driver_number = None
+            for driver in drivers:
+                if driver['full_name'].lower() == driver_name.lower():
+                    driver_number = driver['driver_number']
+                    break
+            
+            if driver_number:
+                api_url_race_control = f"https://api.openf1.org/v1/race_control?driver_number={driver_number}"
+                respuesta_race_control = requests.get(api_url_race_control)
+                
+                if respuesta_race_control.status_code == 200:
+                    race_control_datos = respuesta_race_control.json()
+                    
+                    if race_control_datos:
+                        for data in race_control_datos:
+                            session_key = data['session_key']
+                            api_url_team_radio = f"https://api.openf1.org/v1/team_radio?session_key={session_key}&driver_number={driver_number}"
+                            response_team_radio = requests.get(api_url_team_radio)
+                            if response_team_radio.status_code == 200:
+                                team_radio_data.extend(response_team_radio.json())
+                            else:
+                                team_radio_data = []
+                    else:
+                        error = "No hay información disponible para el nombre de piloto proporcionado."
                 else:
-                    for data in race_control_data:
-                        session_key = data['session_key']
-                        api_url_team_radio = f"https://api.openf1.org/v1/team_radio?session_key={session_key}&driver_number={driver_number}"
-                        respuesta_radio = requests.get(api_url_team_radio)
-                        if respuesta_radio.status_code == 200:
-                            team_radio_data.extend(respuesta_radio.json())
-                        else:
-                            team_radio_data = []
+                    error = "No hay información disponible para el nombre de piloto proporcionado."
             else:
-                error = "No hay información disponible para el número de piloto proporcionado."
+                error = "No se encontró un piloto con ese nombre."
+        else:
+            error = "Error al obtener la lista de pilotos."
     
-    return render_template("radio.html", race_control_data=race_control_data, team_radio_data=team_radio_data, error=error, driver_number=driver_number)
+    return render_template("radio.html", race_control_datos=race_control_datos, team_radio_data=team_radio_data, error=error, driver_name=driver_name)
+
 
 @app.route('/tiempo', methods=['GET'])
 def tiempo():
